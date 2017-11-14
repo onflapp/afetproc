@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
+  <script src="/static/jquery.js"></script>
+  <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+ <div class="container">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">inPOSTER</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/select-template">Select Template</a></li>
+            <li class="active"><a href="#">Fill Placeholders</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+<% 
+    var datafile = __dirname+'/data/templates/'+query['name'];
+    var out = proc.execFileSync(__dirname+'/placeholders_list.sh', [datafile]);
+
+    var rv = JSON.parse(out);
+%>
+    <form class="form-horizontal" action="/data/placeholders/<%= query['name'] %>" method="post" enctype="multipart/form-data">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4>Text Placeholders</h4></div>
+        <div class="panel-body">
+<% 
+    for (var i = 0; i < rv.length; i++) {
+        var it = rv[i];
+        if (it.t == 11) {
+          %>
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><%= it.n %></label>
+            <div class="col-sm-10">
+              <input class="form-control" name="<%= it.n %>"></input>
+            </div>
+          </div>
+          <%
+        }
+    }
+%>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4>Image Placeholders</h4></div>
+        <div class="panel-body">
+<% 
+    for (var i = 0; i < rv.length; i++) {
+        var it = rv[i];
+        if (it.t == 20) {
+          %>
+          <div class="form-group">
+            <label class="col-sm-2 control-label"><%= it.n %></label>
+            <div class="col-sm-10">
+              <input class="form-control" type="file" name="<%= it.n %>"></input>
+            </div>
+          </div>
+          <%
+        }
+    }
+%>
+        </div>
+      </div>
+
+        <input type="hidden" name=":forward" value="/replace-placeholders?name=<%= query['name'] %>" />
+          <div class="form-group">
+        <div class="col-sm-12">
+          <div class="pull-right">
+          <input type="submit" class="btn btn-primary" value="Replace Placeholders" />
+          </div>
+        </div>
+        </div>
+    </form>
+  </div>
+</body>
